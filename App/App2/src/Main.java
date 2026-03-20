@@ -1,6 +1,7 @@
+import java.io.*;
 import java.util.*;
 
-class Reservation {
+class Reservation implements Serializable {
     String guestName;
     String roomType;
 
@@ -12,42 +13,35 @@ class Reservation {
 
 public class Main {
 
-    static Map<String, Integer> inventory = new HashMap<>();
-    static Queue<Reservation> queue = new LinkedList<>();
-
     public static void main(String[] args) {
 
-        inventory.put("Single Room", 2);
+        Map<String, Integer> inventory = new HashMap<>();
+        List<Reservation> history = new ArrayList<>();
 
-        queue.add(new Reservation("Alice", "Single Room"));
-        queue.add(new Reservation("Bob", "Single Room"));
-        queue.add(new Reservation("Charlie", "Single Room"));
-
-        Runnable task = () -> {
-            while (true) {
-                processBooking();
-            }
-        };
-
-        Thread t1 = new Thread(task);
-        Thread t2 = new Thread(task);
-
-        t1.start();
-        t2.start();
-    }
-
-    static synchronized void processBooking() {
-
-        if (queue.isEmpty()) return;
-
-        Reservation r = queue.poll();
-
-        if (inventory.getOrDefault(r.roomType, 0) > 0) {
-            inventory.put(r.roomType, inventory.get(r.roomType) - 1);
-            System.out.println(Thread.currentThread().getName() +
-                    " booked for " + r.guestName);
-        } else {
-            System.out.println(r.guestName + " failed (No rooms)");
+        // Restore data if file exists
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("data.ser"))) {
+            inventory = (Map<String, Integer>) in.readObject();
+            history = (List<Reservation>) in.readObject();
+            System.out.println("Data restored successfully");
+        } catch (Exception e) {
+            System.out.println("No previous data found, starting fresh");
         }
+
+        // Add sample data
+        inventory.put("Single Room", 2);
+        history.add(new Reservation("Alice", "Single Room"));
+
+        // Save data
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("data.ser"))) {
+            out.writeObject(inventory);
+            out.writeObject(history);
+            System.out.println("Data saved successfully");
+        } catch (Exception e) {
+            System.out.println("Error saving data");
+        }
+
+        // Display data
+        System.out.println("Inventory: " + inventory);
+        System.out.println("Bookings: " + history.size());
     }
 }
