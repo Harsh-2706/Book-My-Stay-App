@@ -3,50 +3,51 @@ import java.util.*;
 class Reservation {
     String guestName;
     String roomType;
-    String roomId;
 
-    Reservation(String guestName, String roomType, String roomId) {
+    Reservation(String guestName, String roomType) {
         this.guestName = guestName;
         this.roomType = roomType;
-        this.roomId = roomId;
     }
 }
 
 public class Main {
 
+    static Map<String, Integer> inventory = new HashMap<>();
+    static Queue<Reservation> queue = new LinkedList<>();
+
     public static void main(String[] args) {
 
-        Map<String, Integer> inventory = new HashMap<>();
-        inventory.put("Single Room", 1);
+        inventory.put("Single Room", 2);
 
-        List<Reservation> bookingHistory = new ArrayList<>();
-        bookingHistory.add(new Reservation("Alice", "Single Room", "SI1"));
+        queue.add(new Reservation("Alice", "Single Room"));
+        queue.add(new Reservation("Bob", "Single Room"));
+        queue.add(new Reservation("Charlie", "Single Room"));
 
-        Stack<String> rollbackStack = new Stack<>();
-        rollbackStack.push("SI1");
-
-        String cancelRoomId = "SI1";
-
-        boolean found = false;
-
-        for (Reservation r : bookingHistory) {
-            if (r.roomId.equals(cancelRoomId)) {
-
-                found = true;
-
-                inventory.put(r.roomType, inventory.get(r.roomType) + 1);
-
-                rollbackStack.pop();
-
-                System.out.println("Booking cancelled for " + r.guestName + " | Room ID: " + r.roomId);
-                break;
+        Runnable task = () -> {
+            while (true) {
+                processBooking();
             }
-        }
+        };
 
-        if (!found) {
-            System.out.println("Cancellation failed: Invalid reservation");
-        }
+        Thread t1 = new Thread(task);
+        Thread t2 = new Thread(task);
 
-        System.out.println("Updated Inventory: " + inventory);
+        t1.start();
+        t2.start();
+    }
+
+    static synchronized void processBooking() {
+
+        if (queue.isEmpty()) return;
+
+        Reservation r = queue.poll();
+
+        if (inventory.getOrDefault(r.roomType, 0) > 0) {
+            inventory.put(r.roomType, inventory.get(r.roomType) - 1);
+            System.out.println(Thread.currentThread().getName() +
+                    " booked for " + r.guestName);
+        } else {
+            System.out.println(r.guestName + " failed (No rooms)");
+        }
     }
 }
