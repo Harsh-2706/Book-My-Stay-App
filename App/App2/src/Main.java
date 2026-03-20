@@ -1,56 +1,25 @@
-abstract class Room {
-    String type;
-    int beds;
-    double price;
-
-    Room(String type, int beds, double price) {
-        this.type = type;
-        this.beds = beds;
-        this.price = price;
-    }
-
-    void display() {
-        System.out.println(type + " | Beds: " + beds + " | Price: ₹" + price);
-    }
-}
-
-class SingleRoom extends Room {
-    SingleRoom() {
-        super("Single Room", 1, 1000);
-    }
-}
-
-class DoubleRoom extends Room {
-    DoubleRoom() {
-        super("Double Room", 2, 1800);
-    }
-}
-
-class SuiteRoom extends Room {
-    SuiteRoom() {
-        super("Suite Room", 3, 3000);
-    }
-}
+import java.util.HashMap;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        Room r1 = new SingleRoom();
-        Room r2 = new DoubleRoom();
-        Room r3 = new SuiteRoom();
+        HashMap<String, Integer> inventory = new HashMap<>();
 
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
+        inventory.put("Single Room", 5);
+        inventory.put("Double Room", 3);
+        inventory.put("Suite Room", 2);
 
-        r1.display();
-        System.out.println("Available: " + singleAvailable);
+        System.out.println("Current Room Availability:");
+        for (String roomType : inventory.keySet()) {
+            System.out.println(roomType + " -> " + inventory.get(roomType));
+        }
 
-        r2.display();
-        System.out.println("Available: " + doubleAvailable);
+        inventory.put("Single Room", inventory.get("Single Room") - 1);
 
-        r3.display();
-        System.out.println("Available: " + suiteAvailable);
+        System.out.println("\nAfter Booking 1 Single Room:");
+        for (String roomType : inventory.keySet()) {
+            System.out.println(roomType + " -> " + inventory.get(roomType));
+        }
     }
 }
