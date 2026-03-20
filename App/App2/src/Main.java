@@ -1,12 +1,12 @@
 import java.util.*;
 
-class Reservation {
-    String guestName;
-    String roomType;
+class Service {
+    String name;
+    double price;
 
-    Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+    Service(String name, double price) {
+        this.name = name;
+        this.price = price;
     }
 }
 
@@ -14,38 +14,25 @@ public class Main {
 
     public static void main(String[] args) {
 
-        HashMap<String, Integer> inventory = new HashMap<>();
-        inventory.put("Single Room", 2);
-        inventory.put("Double Room", 1);
+        Map<String, List<Service>> addOns = new HashMap<>();
 
-        Queue<Reservation> queue = new LinkedList<>();
-        queue.add(new Reservation("Alice", "Single Room"));
-        queue.add(new Reservation("Bob", "Single Room"));
-        queue.add(new Reservation("Charlie", "Single Room"));
+        String reservationId = "SI1";
 
-        HashMap<String, Set<String>> allocatedRooms = new HashMap<>();
-        allocatedRooms.put("Single Room", new HashSet<>());
-        allocatedRooms.put("Double Room", new HashSet<>());
+        List<Service> services = new ArrayList<>();
+        services.add(new Service("Breakfast", 200));
+        services.add(new Service("Airport Pickup", 500));
 
-        int idCounter = 1;
+        addOns.put(reservationId, services);
 
-        while (!queue.isEmpty()) {
+        double totalCost = 0;
 
-            Reservation r = queue.poll();
-            String type = r.roomType;
+        System.out.println("Services for Reservation " + reservationId + ":");
 
-            if (inventory.getOrDefault(type, 0) > 0) {
-
-                String roomId = type.substring(0, 2).toUpperCase() + idCounter++;
-
-                allocatedRooms.get(type).add(roomId);
-                inventory.put(type, inventory.get(type) - 1);
-
-                System.out.println(r.guestName + " booked " + type + " | Room ID: " + roomId);
-
-            } else {
-                System.out.println(r.guestName + " booking failed (No availability)");
-            }
+        for (Service s : addOns.get(reservationId)) {
+            System.out.println(s.name + " - ₹" + s.price);
+            totalCost += s.price;
         }
+
+        System.out.println("Total Add-On Cost: ₹" + totalCost);
     }
 }
