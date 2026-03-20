@@ -1,56 +1,53 @@
-abstract class Room {
-    String type;
-    int beds;
-    double price;
+import java.util.*;
 
-    Room(String type, int beds, double price) {
-        this.type = type;
-        this.beds = beds;
-        this.price = price;
-    }
+class Reservation {
+    String guestName;
+    String roomType;
 
-    void display() {
-        System.out.println(type + " | Beds: " + beds + " | Price: ₹" + price);
-    }
-}
-
-class SingleRoom extends Room {
-    SingleRoom() {
-        super("Single Room", 1, 1000);
-    }
-}
-
-class DoubleRoom extends Room {
-    DoubleRoom() {
-        super("Double Room", 2, 1800);
-    }
-}
-
-class SuiteRoom extends Room {
-    SuiteRoom() {
-        super("Suite Room", 3, 3000);
+    Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 }
 
 public class Main {
 
+    static Map<String, Integer> inventory = new HashMap<>();
+    static Queue<Reservation> queue = new LinkedList<>();
+
     public static void main(String[] args) {
 
-        Room r1 = new SingleRoom();
-        Room r2 = new DoubleRoom();
-        Room r3 = new SuiteRoom();
+        inventory.put("Single Room", 2);
 
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
+        queue.add(new Reservation("Alice", "Single Room"));
+        queue.add(new Reservation("Bob", "Single Room"));
+        queue.add(new Reservation("Charlie", "Single Room"));
 
-        r1.display();
-        System.out.println("Available: " + singleAvailable);
+        Runnable task = () -> {
+            while (true) {
+                processBooking();
+            }
+        };
 
-        r2.display();
-        System.out.println("Available: " + doubleAvailable);
+        Thread t1 = new Thread(task);
+        Thread t2 = new Thread(task);
 
-        r3.display();
-        System.out.println("Available: " + suiteAvailable);
+        t1.start();
+        t2.start();
+    }
+
+    static synchronized void processBooking() {
+
+        if (queue.isEmpty()) return;
+
+        Reservation r = queue.poll();
+
+        if (inventory.getOrDefault(r.roomType, 0) > 0) {
+            inventory.put(r.roomType, inventory.get(r.roomType) - 1);
+            System.out.println(Thread.currentThread().getName() +
+                    " booked for " + r.guestName);
+        } else {
+            System.out.println(r.guestName + " failed (No rooms)");
+        }
     }
 }
