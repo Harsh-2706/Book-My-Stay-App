@@ -1,14 +1,8 @@
 import java.util.*;
 
-class Reservation {
-    String guestName;
-    String roomType;
-    String roomId;
-
-    Reservation(String guestName, String roomType, String roomId) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-        this.roomId = roomId;
+class InvalidBookingException extends Exception {
+    InvalidBookingException(String message) {
+        super(message);
     }
 }
 
@@ -16,18 +10,35 @@ public class Main {
 
     public static void main(String[] args) {
 
-        List<Reservation> bookingHistory = new ArrayList<>();
+        Map<String, Integer> inventory = new HashMap<>();
+        inventory.put("Single Room", 1);
+        inventory.put("Double Room", 0);
 
-        bookingHistory.add(new Reservation("Alice", "Single Room", "SI1"));
-        bookingHistory.add(new Reservation("Bob", "Double Room", "DO1"));
-        bookingHistory.add(new Reservation("Charlie", "Suite Room", "SU1"));
+        String guestName = "Alice";
+        String requestedRoom = "Double Room";
 
-        System.out.println("Booking History:");
+        try {
+            validateBooking(requestedRoom, inventory);
 
-        for (Reservation r : bookingHistory) {
-            System.out.println(r.guestName + " | " + r.roomType + " | " + r.roomId);
+            inventory.put(requestedRoom, inventory.get(requestedRoom) - 1);
+            System.out.println(guestName + " booking confirmed for " + requestedRoom);
+
+        } catch (InvalidBookingException e) {
+            System.out.println("Booking failed: " + e.getMessage());
         }
 
-        System.out.println("\nTotal Bookings: " + bookingHistory.size());
+        System.out.println("System running safely...");
+    }
+
+    static void validateBooking(String roomType, Map<String, Integer> inventory)
+            throws InvalidBookingException {
+
+        if (!inventory.containsKey(roomType)) {
+            throw new InvalidBookingException("Invalid room type");
+        }
+
+        if (inventory.get(roomType) <= 0) {
+            throw new InvalidBookingException("No rooms available");
+        }
     }
 }
